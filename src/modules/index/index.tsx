@@ -4,11 +4,14 @@ import { useRouter } from "next/router";
 import { Button } from "@aws-amplify/ui-react";
 import { curentAuthenticated } from "@/api/auth/current-authenticated-user";
 import CustomLoading from "@/component/Loading";
-
+type dataUser = {
+  name: string;
+  age: number;
+};
 export const Index = () => {
   const routes = useRouter();
   const [idToken, setIdToken] = useState();
-  const [data, setData] = useState();
+  const [data, setData] = useState<[dataUser]>();
   const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
     curentAuthenticated()
@@ -21,7 +24,7 @@ export const Index = () => {
   }, []);
 
   const apiName = "api-sls-az-dev";
-  const path = "/users";
+  const path = "/user";
   const myInit = {
     headers: {
       Authorization: idToken,
@@ -34,7 +37,7 @@ export const Index = () => {
     setIsLoading(true);
     API.get(apiName, path, myInit)
       .then((response) => {
-        setData(response.body);
+        setData(response.data);
       })
       .catch((error: any) => {
         console.error("error: ", error.message);
@@ -72,7 +75,13 @@ export const Index = () => {
         >
           GET API
         </Button>
-        <p className="ml-5">Data: {data}</p>
+        {data?.map((e: dataUser) => {
+          return (
+            <>
+              <p className="ml-5">{`Name: ${e.name}, age: ${e.age}`}</p>
+            </>
+          );
+        })}
       </div>
     </div>
   );
