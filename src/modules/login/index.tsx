@@ -1,7 +1,8 @@
+import CustomLoading from "@/component/Loading";
 import { configAmplify } from "@/config/config-amplify";
-import { Authenticator, Button } from "@aws-amplify/ui-react";
+import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
-import { Amplify, Auth } from "aws-amplify";
+import { Amplify } from "aws-amplify";
 import { useRouter } from "next/router";
 
 Amplify.configure(configAmplify);
@@ -16,12 +17,7 @@ export const Login = () => {
 
   function Hello(props: HelloProps) {
     routes.push("/");
-    return (
-      <div>
-        <h1>Hello {props.user?.username}</h1>
-        <Button onClick={props.signOut}>Sign Out</Button>
-      </div>
-    );
+    return <></>;
   }
 
   return (

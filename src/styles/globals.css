@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 @import "../modules/login/index.css";
+@import "../component/Loading/index.css";
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
