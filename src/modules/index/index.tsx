@@ -1,70 +1,67 @@
-import React, { useEffect, useState } from "react";
-import { Amplify, API, Auth } from "aws-amplify";
-import { useRouter } from "next/router";
+import { getUser } from "@/api/user/get-user";
+import { postUser } from "@/api/user/post-user";
 import { Button } from "@aws-amplify/ui-react";
-import { curentAuthenticated } from "@/api/auth/current-authenticated-user";
-import CustomLoading from "@/component/Loading";
+import { useRouter } from "next/router";
+import { useState } from "react";
 type dataUser = {
   name: string;
   age: number;
 };
+
+type dataProduct = {
+  name: string;
+  price: number;
+};
+
 export const Index = () => {
   const routes = useRouter();
-  const [idToken, setIdToken] = useState();
   const [data, setData] = useState<[dataUser]>();
+  const [dataProduct, setDataProduct] = useState<[dataProduct]>();
   const [isLoading, setIsLoading] = useState(false);
-  useEffect(() => {
-    curentAuthenticated()
-      .then((res: any) => {
-        const { attributes, signInUserSession } = res;
-        const idTokenNew = signInUserSession.idToken.jwtToken;
-        setIdToken(idTokenNew);
-      })
-      .catch((err) => routes.push("/login"));
-  }, []);
+  const [isLoadingProduct, setIsLoadingProduct] = useState(false);
 
-  const apiName = "api-sls-az-dev";
-  const path = "/user";
-  const myInit = {
-    headers: {
-      Authorization: idToken,
-    },
-    body: {
-      name: "Hoàng AWS",
-    },
-  };
   const callAPI = () => {
     setIsLoading(true);
-    API.get(apiName, path, myInit)
+    getUser()
       .then((response) => {
+        console.log(response,"response");
         setData(response.data);
       })
       .catch((error: any) => {
-        console.error("error: ", error.message);
+        console.log("error", error);
+        setData(undefined);
+        // routes.push("/auth/login");
       })
       .finally(() => {
         setIsLoading(false);
       });
   };
 
-  const postAPI = () => {
-    setIsLoading(true);
-    API.post(apiName, path, myInit)
+  const callAPIProduct = () => {
+    setIsLoadingProduct(true);
+    const body = {
+      // id: "12",
+      username: "hoangaws",
+      email: "hoangaws@gmail.com"
+    }
+    postUser(body)
       .then((response) => {
-        setData(response.body);
+        console.log("response", response);
       })
       .catch((error: any) => {
-        console.error("error: ", error.message);
+        console.log("error", error.response.data.message);
+        setDataProduct(undefined);
+        // routes.push("/auth/login");
       })
       .finally(() => {
-        setIsLoading(false);
+        setIsLoadingProduct(false);
       });
   };
 
   return (
     <div className="grid place-items-center h-[100vh]">
+      {/* <CustomLoading isLoading={isLoading} /> */}
       <div className="flex">
-        {/* <CustomLoading isLoading={isLoading} /> */}
         <Button
           variation="primary"
           colorTheme="success"
@@ -73,15 +70,28 @@ export const Index = () => {
           isLoading={isLoading}
           onClick={callAPI}
         >
-          GET API
+          GET API USER
         </Button>
-        {data?.map((e: dataUser) => {
+        {data?.map((e: dataUser, index: number) => {
           return (
-            <>
-              <p className="ml-5">{`Name: ${e.name}, age: ${e.age}`}</p>
-            </>
+            <p
+              key={index}
+              className="ml-5"
+            >{`Name: ${e.name}, age: ${e.age}`}</p>
           );
         })}
+      </div>
+      <div className="flex">
+        <Button
+          variation="primary"
+          colorTheme="success"
+          size="small"
+          loadingText="Vui lòng chờ"
+          isLoading={isLoadingProduct}
+          onClick={callAPIProduct}
+        >
+          GET API PRODUCT
+        </Button>
       </div>
     </div>
   );

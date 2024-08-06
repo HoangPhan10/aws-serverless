@@ -1,11 +1,9 @@
+import { curentAuthenticated } from "@/api/auth/current-authenticated-user";
 import CustomLoading from "@/component/Loading";
-import { configAmplify } from "@/config/config-amplify";
+import { setUserCredential } from "@/service/auth";
 import { Authenticator } from "@aws-amplify/ui-react";
-import "@aws-amplify/ui-react/styles.css";
-import { Amplify } from "aws-amplify";
 import { useRouter } from "next/router";
-
-Amplify.configure(configAmplify);
+import { useEffect, useState } from "react";
 
 type HelloProps = {
   signOut: any;
@@ -14,10 +12,22 @@ type HelloProps = {
 
 export const Login = () => {
   const routes = useRouter();
-
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   function Hello(props: HelloProps) {
-    routes.push("/");
-    return <></>;
+    useEffect(() => {
+      setIsLoading(true);
+      curentAuthenticated()
+        .then((res: any) => {
+          const { signInUserSession } = res;
+          const idTokenNew = signInUserSession.idToken.jwtToken;
+          setUserCredential(idTokenNew);
+          routes.push("/");
+        })
+        .catch((err) => routes.push("/login"))
+        .finally(() => setIsLoading(false));
+    });
+
+    return <CustomLoading isLoading={isLoading} />;
   }
 
   return (
